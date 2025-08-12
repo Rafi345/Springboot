@@ -1,0 +1,30 @@
+node {
+    
+    def mvnHome = tool 'Maven'
+
+    stage('Checkout') {
+        git branch: 'main',
+            credentialsId: 'github-https-creds',
+            url: 'https://github.com/Rafi345/Springboot.git'
+        sh 'ls -la'
+    }
+
+    stage('Build') {
+        sh "${mvnHome}/bin/mvn clean install"
+    }
+
+    stage('Package') {
+        sh "${mvnHome}/bin/mvn package"
+    }
+
+    stage('SonarQube Analysis') {
+        withCredentials([string(credentialsId: 'Sonarqube_token', variable: 'SONARQUBE_TOKEN')]) {
+            sh """
+                ${mvnHome}/bin/mvn sonar:sonar \
+                    -Dsonar.projectKey=Basic_SpringBoot_Code_Rafi \
+                    -Dsonar.host.url=https://d6312cd2eccd.ngrok-free.app \
+                    -Dsonar.login=${SONARQUBE_TOKEN}
+            """
+        }
+    }
+}
