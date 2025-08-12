@@ -4,7 +4,7 @@ node {
 
     stage('Checkout') {
         git branch: 'main',
-            credentialsId: 'github-https-creds',
+            credentialsId: 'Gitkey_in_Jenkins',
             url: 'https://github.com/Rafi345/Springboot.git'
         sh 'ls -la'
     }

@@ -13,7 +13,7 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>Simple-Project-with-Errors-Rafi</artifactId>
+    <artifactId>Simple-Project-Rafi</artifactId>
     <version>1.0.0</version>
 
     <properties>
