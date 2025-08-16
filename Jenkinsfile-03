@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven' 
+    }
+
+    environment {
+        SONARQUBE_URL = 'http://44.203.196.91:9000/projects'
+        SONARQUBE_TOKEN = credentials('Sonar_Ec2_token') 
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    credentialsId: 'Github_Ec2_PAT_Token', 
+                    url: 'https://github.com/Rafi345/Springboot.git'
+                sh 'ls -la'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh """
+                    mvn sonar:sonar \
+                        -Dsonar.projectKey=EC2_Jenkins_pipeline \
+                        -Dsonar.host.url=http://44.203.196.91:9000/projects \
+                        -Dsonar.login="${SONARQUBE_TOKEN}"
+                """
+            }
+        }
+    }
+}
+
