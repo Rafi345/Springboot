@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_URL = 'http://44.203.196.91:9000/projects'
+        SONARQUBE_URL = 'http://44.203.196.91:9000'
         SONARQUBE_TOKEN = credentials('Sonar_Ec2_token') 
     }
 
@@ -37,7 +37,7 @@ pipeline {
                 sh """
                     mvn sonar:sonar \
                         -Dsonar.projectKey=EC2_Jenkins_pipeline \
-                        -Dsonar.host.url=http://44.203.196.91:9000/projects \
+                        -Dsonar.host.url=http://44.203.196.91:9000 \
                         -Dsonar.login="${SONARQUBE_TOKEN}"
                 """
             }
