@@ -54,7 +54,7 @@ pipeline {
                     pkill -f "Simple-Project-Rafi-updated-1.0.0.jar" || true
 
                      # Start new process on port 9090 in background
-                    nohup java -jar target/Simple-Project-Rafi-updated-1.0.0.jar --server.port=9090 > app.log 2>&1 &
+                    nohup java -jar /var/lib/jenkins/workspace/Pipeline-1/target/Simple-Project-Rafi-updated-1.0.0.jar --server.port=9090 > app.log 2>&1 &
                     '''
     }
 }
