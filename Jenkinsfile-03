@@ -10,15 +10,15 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_URL = 'http://44.203.196.91:9000'
-        SONARQUBE_TOKEN = credentials('Sonar_Ec2_token') 
+        SONARQUBE_URL = 'http://13.39.106.54:9000'
+        SONARQUBE_TOKEN = credentials('Sonar_token') 
     }
 
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'Github_Ec2_PAT_Token', 
+                    credentialsId: 'Git_PAT', 
                     url: 'https://github.com/Rafi345/Springboot.git'
                 sh 'ls -la'
             }
@@ -40,8 +40,8 @@ pipeline {
             steps {
                 sh """
                     mvn sonar:sonar \
-                        -Dsonar.projectKey=EC2_Jenkins_pipeline \
-                        -Dsonar.host.url=http://44.203.196.91:9000 \
+                        -Dsonar.projectKey=Ec2_project \
+                        -Dsonar.host.url=http://13.39.106.54:9000 \
                         -Dsonar.login="${SONARQUBE_TOKEN}"
                 """
             }
