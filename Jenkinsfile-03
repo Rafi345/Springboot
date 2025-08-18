@@ -48,16 +48,55 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                sh '''
-                    # Stop old process if already running
-                    pkill -f "Simple-Project-Rafi-updated-1.0.0.jar" || true
+    steps {
+        sh '''
+            # Stop old process if running
+            pkill -f "Simple-Project-Rafi-updated-1.0.0.jar" || true
 
-                     # Start new process on port 9090 in background
-                    nohup java -jar /var/lib/jenkins/workspace/Pipeline-1/target/Simple-Project-Rafi-updated-1.0.0.jar --server.port=9090 > app.log 2>&1 &
-                    '''
+            # Go to target folder
+            cd /var/lib/jenkins/workspace/Pipeline-1/target
+
+            # Start the jar in background with logs
+            nohup java -jar Simple-Project-Rafi-updated-1.0.0.jar --server.port=9090 > app.log 2>&1 &
+
+            # Wait a few seconds to start
+            sleep 10
+
+            # Show if port 9090 is listening
+            netstat -tulnp | grep 9090 || true
+        '''
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//         stage('Deploy') {
+//             steps {
+//                 sh '''
+//                     # Stop old process if already running
+//                     pkill -f "Simple-Project-Rafi-updated-1.0.0.jar" || true
+
+//                      # Start new process on port 9090 in background
+//                     nohup java -jar /var/lib/jenkins/workspace/Pipeline-1/target/Simple-Project-Rafi-updated-1.0.0.jar --server.port=9090 > app.log 2>&1 &
+//                     '''
+//     }
+// }
+
         
     }
 }
