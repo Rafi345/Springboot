@@ -34,7 +34,7 @@ pipeline {
                 scp -o StrictHostKeyChecking=no target/Simple-Project-Rafi-updated-1.0.0.jar ${APP_USER}@${APP_SERVER}:/home/ubuntu/
                 
                 # Run the jar in the background on the remote server
-                ssh -o StrictHostKeyChecking=no ${APP_USER}@${APP_SERVER} 'nohup java -jar /home/ubuntu/Simple-Project-Rafi-updated-1.0.0.jar > /home/ubuntu/app.log 2>&1 &'
+                ssh -o StrictHostKeyChecking=no ${APP_USER}@${APP_SERVER} 'nohup java -jar /home/ubuntu/Simple-Project-Rafi-updated-1.0.0.jar  --server.address=0.0.0.0 --server.port=8080 > /home/ubuntu/app.log 2>&1 &'
                 
                 echo "Deployment completed."
             """
@@ -53,3 +53,5 @@ pipeline {
         }
     }
 }
+
+
