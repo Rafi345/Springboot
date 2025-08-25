@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+triggers {
+        githubPush()   
+    }
+
+    tools {
+        maven 'Maven' 
+    }
+
+    environment {
+        APP_SERVER_IP = '15.236.133.175'   // <-- replace with EC2 public IP
+        APP_SERVER_USER = 'ubuntu'             // <-- default for Ubuntu EC2
+        SSH_key='key'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: "main", url: "https://github.com/Rafi345/Springboot.git"
+            }
+        }
+
+        stage('Build') {
+            steps {
+                withEnv(["PATH+MAVEN=${tool 'Maven'}/bin"]) {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+
+        stage('Deploy to App Server') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'SSH_KEY', keyFileVariable: 'KEYFILE')]) {
+                    sh '''
+                        echo "Deploying to server: $APP_SERVER_IP"
+
+                        # Copy the built jar to the app server
+                        scp -o StrictHostKeyChecking=no -i $KEYFILE target/Simple-Project-Rafi-updated-1.0.0.jar $APP_SERVER_USER@$APP_SERVER_IP:/home/$APP_SERVER_USER/
+
+                        # Restart app on remote server
+                        ssh -o StrictHostKeyChecking=no -i $KEYFILE $APP_SERVER_USER@$APP_SERVER_IP << EOF
+                            pkill -f Simple-Project-Rafi-updated-1.0.0.jar || true
+                            nohup java -jar /home/$APP_SERVER_USER/Simple-Project-Rafi-updated-1.0.0.jar > app.log 2>&1 &
+                        EOF
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment successful!"
+        }
+        failure {
+            echo "Deployment failed!"
+        }
+    }
+}
