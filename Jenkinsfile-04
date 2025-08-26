@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     environment {
-        APP_SERVER = "15.236.133.175"   
+        APP_SERVER = "52.47.178.63"   
         APP_USER   = "ubuntu"
         GIT_REPO   = "https://github.com/Rafi345/Springboot.git"
     }
