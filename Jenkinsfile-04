@@ -16,13 +16,21 @@ pipeline {
             }
         }
 
+        // stage('Build') {
+        //     steps {
+        //         withMaven(maven: 'Maven-3.9.6') {
+        //             sh 'mvn clean package -DskipTests'
+        //         }
+        //     }
+        // }
         stage('Build') {
-            steps {
-                withMaven(maven: 'Maven-3.9.6') {
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
+    steps {
+        withMaven(maven: 'Maven') {
+            sh 'mvn clean install'
         }
+    }
+}
+
 
         stage('Deploy to App Server') {
     steps {
