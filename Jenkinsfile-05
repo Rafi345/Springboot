@@ -10,10 +10,10 @@ pipeline {
         AWS_CRED_ID = 'aws-credentials'
     }
 
-    stages {
+         stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Rafi345/Springboot.git'
+                git branch: 'main', url: 'https://github.com/Rafi345/Springboot.git'
             }
         }
 
