@@ -38,15 +38,7 @@ pipeline {
             }
         }
 
-        stage('Configure kubectl for EKS') {
-            steps {
-                script {
-                    // Configure kubectl to connect to your EKS cluster
-                    sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
-                    sh "kubectl config get-contexts"
-                }
-            }
-        }
+        
         stage('Configure kubectl for EKS') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${AWS_CRED_ID}",
