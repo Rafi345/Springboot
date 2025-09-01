@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_CREDENTIALS = 'docker-hub-id'   // Jenkins credentials ID
+        DOCKER_IMAGE = 'rafi345/springboot-app:latest'
+        KUBE_NAMESPACE = 'rafi'
+        AWS_REGION = 'eu-west-3'                        // Your AWS region
+        EKS_CLUSTER_NAME = 'batch4-team2-eks-cluster'      // Your EKS cluster name
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Rafi345/Springboot.git'
+            }
+        }
+
+        stage('Build with Maven') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS}", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                    sh "docker push ${DOCKER_IMAGE}"
+                }
+            }
+        }
+
+        stage('Configure kubectl for EKS') {
+            steps {
+                script {
+                    // Configure kubectl to connect to your EKS cluster
+                    sh "aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}"
+                    sh "kubectl config get-contexts"
+                }
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    // Apply deployment and service YAML in your repo
+                    sh "kubectl apply -f k8s-deployment.yaml -n ${KUBE_NAMESPACE}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Spring Boot app deployed successfully to EKS!'
+        }
+        failure {
+            echo 'Pipeline failed.'
+        }
+    }
+}
