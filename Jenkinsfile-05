@@ -54,7 +54,7 @@ pipeline {
             steps {
                 script {
                     // Apply deployment and service YAML in your repo
-                    sh "kubectl apply -f k8s-deployment.yaml -n ${KUBE_NAMESPACE}"
+                    sh "kubectl apply -f k8-deployment.yaml -n ${KUBE_NAMESPACE}"
                 }
             }
         }
