@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+
+    environment {
+        APP_NAME = 'springboot-app'           // your Spring Boot app name
+        IMAGE_TAG = 'v10'             // Docker image tag
+        DOCKERHUB_USER = 'rafi345'
+        HELM_RELEASE = 'hello-release'   // Helm release name
+        CHART_DIR = './helm-chart'       // path to your Helm chart in repo
+        DOCKER='docker_id'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Rafi345/Springboot.git'
+            }
+        }
+
+        stage('Build Spring Boot App') {
+            steps {
+                sh './mvnw clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${APP_NAME}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'DOCKER', 
+                                                  usernameVariable: 'DOCKER_USER', 
+                                                  passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                sh "docker tag ${APP_NAME}:${IMAGE_TAG} ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}"
+                sh "docker push ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}"
+            }
+        }
+
+        stage('Load Docker Image into Minikube') {
+            steps {
+                // For local Minikube with Docker driver
+                sh "minikube image load ${DOCKERHUB_USER}/${APP_NAME}:${IMAGE_TAG}"
+            }
+        }
+
+        stage('Deploy with Helm') {
+            steps {
+                sh """
+                   helm upgrade --install ${HELM_RELEASE} ${CHART_DIR} \
+                   --set image.repository=${DOCKERHUB_USER}/${APP_NAME} \
+                   --set image.tag=${IMAGE_TAG} \
+                   --kube-context=minikube
+                   """
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh "kubectl get pods"
+                sh "kubectl get svc"
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline finished!"
+        }
+    }
+}
